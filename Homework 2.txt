@@ -1,0 +1,113 @@
+Sub Stocks():
+
+For Each ws In Worksheets
+
+'Set Columns
+    ws.Cells(1, 9) = "Ticker"
+    ws.Cells(1, 10) = "Yearly Change"
+    ws.Cells(1, 11) = "Percent Change"
+    ws.Cells(1, 12) = "Total Stock Volume"
+
+'Variables
+Dim Ticker_Symbol As String
+Dim lastRow As Long
+Dim Ticker_Difference As Double
+Dim Summary_Table As Integer
+Dim Percent_Change As Double
+Dim Stock_Volume As Double
+Dim Opening_Price As Double
+Dim Closing_Price As Double
+
+'Set the Value
+Summary_Table = 1
+Percent_Change = 0
+Stock_Volume = 0
+
+'Last Row Count
+lastRow = ws.Cells(Rows.Count, "A").End(xlUp).Row
+
+For i = 2 To lastRow
+'Opening Price Calculation
+    If ws.Cells(i - 1, 1).Value <> ws.Cells(i, 1).Value Then
+'Add Another Row
+    Summary_Table = Summary_Table + 1
+'Figure out Opening Price
+    Opening_Price = ws.Cells(i, 3).Value
+    Ticker_Symbol = ws.Cells(i, 1).Value
+'Print Ticker Name
+    ws.Range("I" & Summary_Table).Value = Ticker_Symbol
+End If
+'Closing Value of Last Row
+If ws.Cells(i + 1, 1).Value <> ws.Cells(i, 1).Value Then
+'Closing Price Calculation
+    Closing_Price = ws.Cells(i, 6).Value
+'Stock Volume calculation
+Stock_Volume = Stock_Volume + ws.Cells(i, 7).Value
+        ws.Range("L" & Summary_Table).Value = Stock_Volume
+        Stock_Volume = 0
+Else: Stock_Volume = Stock_Volume + ws.Cells(i, 7).Value
+   
+End If
+    'Calculates Yearly Change
+    Dim change1 As Double
+    change1 = Closing_Price - Opening_Price
+    ws.Range("J" & Summary_Table).Value = change1
+    'Calculates % Change
+    If Opening_Price = 0 Then
+    ws.Range("K" & Summary_Table).Value = 0
+    Else
+    Percent_Change = (Closing_Price - Opening_Price) / Opening_Price
+    ws.Range("K" & Summary_Table).Value = Percent_Change
+    End If
+    'Changes Percent Change to a %
+    ws.Cells(Summary_Table, 11).NumberFormat = "0.00%"
+
+'Colored the Values greater than or less than 0
+If ws.Range("J" & Summary_Table).Value > "0" Then
+    ws.Range("J" & Summary_Table).Interior.ColorIndex = 4
+    
+ElseIf ws.Range("J" & Summary_Table).Value < "0" Then
+    ws.Range("J" & Summary_Table).Interior.ColorIndex = 3
+
+End If
+
+Next i
+
+'Placed Text
+ws.Cells(2, 14) = "Greatest % Increase"
+ws.Cells(3, 14) = "Greatest % Decrease"
+ws.Cells(4, 14) = "Greatest Total Volume"
+
+ws.Cells(1, 15) = "Ticker"
+ws.Cells(1, 16) = "Value"
+
+'Calculated Max and Min and had to change to percentages again
+ws.Cells(2, 16) = WorksheetFunction.Max(ws.Range("K:K"))
+ws.Cells(2, 16).NumberFormat = "0.00%"
+
+ws.Cells(3, 16) = WorksheetFunction.Min(ws.Range("K:K"))
+ws.Cells(3, 16).NumberFormat = "0.00%"
+
+ws.Cells(4, 16) = WorksheetFunction.Max(ws.Range("L:L"))
+
+'Last Row Count
+lastRow = ws.Cells(Rows.Count, "A").End(xlUp).Row
+
+'Find the ticker values associated with Max/Min numbers above
+For r = 1 To lastRow
+    If ws.Cells(r, 11).Value = ws.Cells(2, 16).Value Then
+    ws.Cells(2, 15).Value = ws.Cells(r, 9).Value
+    ElseIf ws.Cells(r, 11).Value = ws.Cells(3, 16).Value Then
+    ws.Cells(3, 15).Value = ws.Cells(r, 9).Value
+    ElseIf ws.Cells(r, 12).Value = ws.Cells(4, 16).Value Then
+    ws.Cells(4, 15).Value = ws.Cells(r, 9).Value
+    End If
+ 
+Next r
+
+
+Next ws
+
+End Sub
+
+
